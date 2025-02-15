@@ -1,0 +1,17 @@
+# Java/Maven
+target/
+*.log
+*.jar
+*.war
+
+# Node.js
+node_modules/
+dist/
+
+# Docker
+*.dockerfile
+.env
+
+# macOS/Windows
+.DS_Store
+Thumbs.db
