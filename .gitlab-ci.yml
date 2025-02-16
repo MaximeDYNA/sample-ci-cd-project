@@ -1,0 +1,42 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  # Pour lancer Maven en mode batch, sans tests si besoin. 
+  # Tu peux enlever "-DskipTests" pour exécuter les tests lors du build.
+  MAVEN_CLI_OPTS: "-B -DskipTests"
+
+build-backend:
+  stage: build
+  image: maven:3.9.4-eclipse-temurin-17
+  script:
+    - echo "Building Spring Boot backend..."
+    - mvn $MAVEN_CLI_OPTS clean package
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 week
+
+test-backend:
+  stage: test
+  image: maven:3.9.4-eclipse-temurin-17
+  script:
+    - echo "Running tests for backend..."
+    - mvn test
+
+deploy-backend:
+  stage: deploy
+  image: openjdk:17
+  script:
+    - echo "Deploying backend to staging environment..."
+    # Exemple de commande pour copier et exécuter le JAR sur un serveur distant via SSH
+    # Remplacer <user>, <server_ip>, et <path> par les valeurs appropriées.
+    - scp target/*.jar ubuntu@3.92.231.200:/home/ubuntu/workspace/projects/imc-deploy/
+- ssh ubuntu@3.92.231.200 "cd /home/ubuntu/workspace/projects/imc-deploy && nohup java -jar $(ls *.jar | tail -n 1) > app.log 2>&1 &"
+
+  environment:
+    name: staging
+    # Remplacer l'URL par l'adresse réelle de l'environnement de staging
+    url: http://3.92.231.200
